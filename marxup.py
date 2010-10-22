@@ -1,15 +1,11 @@
 import re
 
 class Tiki:
-    cleaners = {}
-    pre_cleaners = {}
-    patterns = {}
-    chunk = []
-    phrase = []
+    groups = ['text', 'meta']
 
-    def __init__(chunk, phrase):
-        self.chunk = chunk
-        self.phrase = phrase
+    def __init__(raw, context = None):
+        self.raw = raw
+        self.context = context
 
     def as_html():
         pass
