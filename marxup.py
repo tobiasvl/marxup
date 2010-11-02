@@ -15,13 +15,12 @@ class Cookbook(object):
 
     def pattern(self, context): #TODO klassemetode?
         """Create a regexp (and cache it)"""
-        if 'context' in self.patterns:
-            return self.patterns['context']
-        else:
+        if 'context' not in self.patterns:
             self.patterns['context'] = self.__compile(getattr(self, context))
+        return self.patterns['context']
 
     def rule(self, context, label, pattern, method, priority=1):
-        getattr(self, context).append('(?<%s>%s)' % (label, pattern), priority) # Add a new chunk/phrase
+        getattr(self, context).append(('(?<%s>%s)' % (label, pattern), priority)) # Add a new chunk/phrase
         self.__dict__[label] = method # Add a method for the rule
 
     def clean(self, token, replacement):
@@ -30,7 +29,7 @@ class Cookbook(object):
     def __compile(self, raw):
         """Builds a regexp with all patterns, sorted by priority"""
         elements = [rule[0] for rule in sorted(raw, key=lambda (pattern, priority): priority)] # Sort by priority
-        return re.compile('|'.join(elements)) # Build a regexp union
+        return re.compile('|'.join(re.escape(p) for p in elements)) # Build a regexp union
 
 class Tiki(Cookbook):
     groups = ['text', 'meta']
@@ -54,9 +53,9 @@ class Tiki(Cookbook):
 
     def as_html(self):
         text = self.raw
-        for (k,v) in self.cleaners.iteritems():
+        for (k, v) in self.cleaners.iteritems():
             text = text.replace(k, v)
-        return handle('chunks', text)
+        return self.handle('chunks', text)
 
     def phrase(self, text):
         return self.handle('phrases', text)
@@ -64,10 +63,12 @@ class Tiki(Cookbook):
     def handle(self, context, text):
         def repl(match):
             method = getattr(self, match.lastgroup)
-            args = groups[:len(inspect.getargspec(method)[0])] # This should be commented but I don't know how
-            return getattr(self, match.lastgroup)(*args) # God dammit, Python. God dammit
+            method_arity = len(inspect.getargspec(method)[0])
+            args = Tiki.groups[:method_arity]
+            return getattr(self, match.lastgroup)(*args)
 
         pattern = self.pattern(context)
+        print pattern
         return re.sub(pattern, repl, text)
 
 class Marxup(Tiki):
@@ -82,5 +83,5 @@ class Marxup(Tiki):
         self.clean("<", "&gt;")
         self.clean("(\r\n|\r)", "\n")
         
-        text = self.chunk('header', '^\=\s*(?<\\1>.+?)$', lambda text: self.element('h3', text))
-        element('h3', text)
+        text = self.chunk('header', '^\=\s*(?<text>.+?)$', lambda text: self.element('h3', text))
+        self.element('h3', text)
