@@ -68,7 +68,7 @@ class Tiki(Cookbook):
             return getattr(self, match.lastgroup)(*args) # God dammit, Python. God dammit
 
         pattern = self.pattern(context)
-        re.sub(pattern, repl, text)
+        return re.sub(pattern, repl, text)
 
 class Marxup(Tiki):
     version = '0.6.5'
