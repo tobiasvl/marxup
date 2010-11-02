@@ -17,7 +17,7 @@ class Cookbook(object):
         if 'context' in self.patterns:
             return self.patterns['context']
         else:
-            self.patterns['context'] = self.__compile(context) #TODO compile?
+            self.patterns['context'] = self.__compile(getattr(self, context))
 
     def rule(self, context, label, pattern, method, priority=1):
         getattr(self, context).append('(?<%s>%s)' % (label, pattern), priority) # Add a new chunk/phrase
@@ -26,8 +26,10 @@ class Cookbook(object):
     def clean(self, token, replacement):
         self.cleaners[token] = replacement
 
-    def __compile(self, raw): #TODO
-        pass
+    def __compile(self, raw):
+        """Builds a regexp with all patterns, sorted by priority"""
+        elements = [rule[0] for rule in sorted(raw, key=lambda (pattern, priority): priority)] # Sort by priority
+        return '|'.join(elements) # Build a regexp union
 
 class Tiki(Cookbook):
     groups = ['text', 'meta']
