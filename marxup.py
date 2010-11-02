@@ -13,14 +13,15 @@ class Cookbook(object):
     def phrase(self, block, *args):
         return self.rule('phrases', block, *args)
 
-    def pattern(self, context):
+    def pattern(self, context): #TODO klassemetode?
         if 'context' in self.patterns:
             return self.patterns['context']
         else:
-            self.patterns['context'] = self.compile(context) #TODO compile?
+            self.patterns['context'] = self.__compile(context) #TODO compile?
 
     def rule(self, context, label, pattern, method, priority=1):
-        pass
+        getattr(self, context).append('(?<%s>%s)' % (label, pattern), priority) # Add a new chunk/phrase
+        self.__dict__[label] = method # Add a method for the rule
 
     def clean(self, token, replacement):
         self.cleaners[token] = replacement
@@ -58,7 +59,7 @@ class Tiki(Cookbook):
         return self.handle('phrases', text)
 
     def handle(self, context, text):
-        pass
+        pass #TODO
 
 class Marxup(Tiki):
     version = '0.6.5'
