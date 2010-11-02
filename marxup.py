@@ -8,10 +8,10 @@ class Cookbook(object):
         self.phrases = []
 
     def chunk(self, block, *args):
-        return self.rule('chunks', block, *args)
+        return self.rule(block, 'chunks', *args)
 
     def phrase(self, block, *args):
-        return self.rule('phrases', block, *args)
+        return self.rule(block, 'phrases', *args)
 
     def pattern(self, context): #TODO klassemetode?
         """Create a regexp (and cache it)"""
@@ -19,8 +19,8 @@ class Cookbook(object):
             self.patterns['context'] = self.__compile(getattr(self, context))
         return self.patterns['context']
 
-    def rule(self, context, label, pattern, method, priority=1):
-        getattr(self, context).append(('(?<%s>%s)' % (label, pattern), priority)) # Add a new chunk/phrase
+    def rule(self, method, context, label, pattern, priority=1):
+        getattr(self, context).append(('(?P<%s>%s)' % (label, pattern), priority)) # Add a new chunk/phrase
         self.__dict__[label] = method # Add a method for the rule
 
     def clean(self, token, replacement):
@@ -81,6 +81,6 @@ class Marxup(Tiki):
         self.clean("<", "&lt;")
         self.clean("<", "&gt;")
         self.clean("(\r\n|\r)", "\n")
-        
-        text = self.chunk('header', '^\=\s*(?<text>.+?)$', lambda text: self.element('h3', text))
-        self.element('h3', text)
+
+        self.chunk(lambda text: self.element('h3', text), 'header', '^\=\s*(?<text>.+?)$')
+    #    self.phrase(lambda text: self.element('span', text), 'heart', '&lt;3')
