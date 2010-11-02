@@ -68,7 +68,6 @@ class Tiki(Cookbook):
             return getattr(self, match.lastgroup)(*args)
 
         pattern = self.pattern(context)
-        print pattern
         return re.sub(pattern, repl, text)
 
 class Marxup(Tiki):
