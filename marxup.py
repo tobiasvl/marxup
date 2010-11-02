@@ -14,6 +14,7 @@ class Cookbook(object):
         return self.rule('phrases', block, *args)
 
     def pattern(self, context): #TODO klassemetode?
+        """Create a regexp (and cache it)"""
         if 'context' in self.patterns:
             return self.patterns['context']
         else:
@@ -29,7 +30,7 @@ class Cookbook(object):
     def __compile(self, raw):
         """Builds a regexp with all patterns, sorted by priority"""
         elements = [rule[0] for rule in sorted(raw, key=lambda (pattern, priority): priority)] # Sort by priority
-        return '|'.join(elements) # Build a regexp union
+        return re.compile('|'.join(elements)) # Build a regexp union
 
 class Tiki(Cookbook):
     groups = ['text', 'meta']
@@ -61,7 +62,13 @@ class Tiki(Cookbook):
         return self.handle('phrases', text)
 
     def handle(self, context, text):
-        pass #TODO
+        def repl(match):
+            method = getattr(self, match.lastgroup)
+            args = groups[:len(inspect.getargspec(method)[0])] # This should be commented but I don't know how
+            return getattr(self, match.lastgroup)(*args) # God dammit, Python. God dammit
+
+        pattern = self.pattern(context)
+        re.sub(pattern, repl, text)
 
 class Marxup(Tiki):
     version = '0.6.5'
