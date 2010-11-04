@@ -29,7 +29,7 @@ class Cookbook(object):
     def __compile(self, raw):
         """Builds a regexp with all patterns, sorted by priority"""
         elements = [rule[0] for rule in sorted(raw, key=lambda (pattern, priority): priority)] # Sort by priority
-        return '|'.join(elements) # Build a regexp union
+        return re.compile('|'.join(elements), re.MULTILINE) # Build a regexp union
 
 class Tiki(Cookbook):
     groups = ['text', 'meta']
@@ -41,7 +41,7 @@ class Tiki(Cookbook):
     def element(self, tag, text, options={}):
         if 'phrase' in options:
             del options['phrase']
-            text = self.phrase(text)
+            text = self.phrase2(text)
         if 'break' in options:
             del options['break']
             text = '<br>\n'.join(text.split('\n'))
@@ -57,21 +57,20 @@ class Tiki(Cookbook):
             text = text.replace(k, v)
         return self.handle('chunks', text)
 
-    def phrase(self, text):
+    def phrase2(self, text):
         return self.handle('phrases', text)
 
     def handle(self, context, text):
         def repl(match):
+            print match.groupdict()
+            print match.lastgroup
             method = getattr(self, match.lastgroup)
             method_arity = len(inspect.getargspec(method)[0])
-            args = map(lambda arg: match.group(arg), Tiki.groups[:method_arity])
-            print match
-            print method
-            print args
+            args = map(lambda arg: match.group(arg), [a + '_' + match.lastgroup for a in Tiki.groups[:method_arity]])
             return getattr(self, match.lastgroup)(*args)
-
         pattern = self.pattern(context)
-        print pattern
+        # TODO when porting this code to python 2.7 (when Cheetah is okay
+        # with it), change this to be compliant?
         return re.sub(pattern, repl, text)
 
 class Marxup(Tiki):
@@ -86,5 +85,7 @@ class Marxup(Tiki):
         self.clean("<", "&gt;")
         self.clean("(\r\n|\r)", "\n")
 
-        self.chunk(lambda text: self.element('h3', text), 'header', '^\=\s*(?P<text>.+?)$')
-    #    self.phrase(lambda text: self.element('span', text), 'heart', '&lt;3')
+        self.chunk(lambda text: self.element('h3', text), 'header', '^\=\s*(?P<text_header>.+?)$')
+        self.chunk(lambda text: self.element('p', text), 'paragraph', '^(?P<text_paragraph>\S.+?)(?:\n\n|\z)', 5)
+        self.phrase(lambda text: self.element('span', text), 'heart', '&hearts;', 2)
+        self.phrase(lambda text: self.element('i', text), 'italic', '(?<![\~\:<])_(?P<text_italic>.+?[^\~\:<])_')
