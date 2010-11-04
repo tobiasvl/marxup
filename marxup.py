@@ -29,7 +29,9 @@ class Cookbook(object):
     def __compile(self, raw):
         """Builds a regexp with all patterns, sorted by priority"""
         elements = [rule[0] for rule in sorted(raw, key=lambda (pattern, priority): priority)] # Sort by priority
-        return re.compile('|'.join(elements), re.MULTILINE) # Build a regexp union
+        a = '|'.join(elements) # Build a regexp union
+        print a
+        return re.compile(a, re.MULTILINE) # Build a regexp union
 
 class Tiki(Cookbook):
     groups = ['text', 'meta']
@@ -85,7 +87,11 @@ class Marxup(Tiki):
         self.clean("<", "&gt;")
         self.clean("(\r\n|\r)", "\n")
 
+        # Define chunks:
         self.chunk(lambda text: self.element('h3', text), 'header', '^\=\s*(?P<text_header>.+?)$')
-        self.chunk(lambda text: self.element('p', text), 'paragraph', '^(?P<text_paragraph>\S.+?)(?:\n\n|\z)', 5)
+        self.chunk(lambda text: self.element('p', text), 'paragraph', '((?m)^(?P<text_paragraph>\S.+?)(?:\\n\\n|\z))', 5)
+        self.chunk(lambda text: self.element('pre', text), 'code', '((?m)^\{\{\{(\s*&lt;(?P<meta>.+?)&gt;)?(?P<text_code>.+?)\}\}\})')
+
+        # Define phrases:
         self.phrase(lambda text: self.element('span', text), 'heart', '&hearts;', 2)
         self.phrase(lambda text: self.element('i', text), 'italic', '(?<![\~\:<])_(?P<text_italic>.+?[^\~\:<])_')
