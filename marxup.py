@@ -1,3 +1,4 @@
+#vim: set fileencoding=utf-8
 import re, inspect
 
 class Cookbook(object):
@@ -93,7 +94,7 @@ class Marxup(Tiki):
 
         # Define chunks:
         self.chunk(lambda text: self.element('h3', text), 'header', '^\=\s*(?P<text_header>.+?)$')
-        self.chunk(lambda text: self.element('p', text, {'phrase': True, 'break': True}), 'paragraph', '((?m)^(?P<text_paragraph>\S.+?)(?:\\n\\n|\Z))', 5)
+        self.chunk(lambda text: self.element('p', text, {'phrase': True, 'break': True}), 'paragraph', '((?m)^(?P<text_paragraph>\S.*?)(?:\n\n|\Z))', 5)
         
         def code(text, meta):
             code = self.element('code', text, {'class': meta})
