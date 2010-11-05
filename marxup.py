@@ -38,7 +38,7 @@ class Cookbook(object):
         return re.compile(a, re.MULTILINE) # Build a regexp union
 
 class Tiki(Cookbook):
-    groups = ['text', 'meta']
+    groups = ['text', 'meta'] # The different match groups we want to treat differently
 
     def __init__(self, raw, context = None):
         super(Tiki, self).__init__()
@@ -58,7 +58,9 @@ class Tiki(Cookbook):
             return '<%s%s>' % (tag, attributes)
 
     def as_html(self):
+        """Convert the Marxup to HTML."""
         text = self.raw
+        # Initial cleaning/escaping
         for (k, v) in self.precleaners.iteritems():
             text = text.replace(k, v)
         for (k, v) in self.cleaners.iteritems():
@@ -80,21 +82,23 @@ class Tiki(Cookbook):
         return re.sub(pattern, repl, text)
 
 class Marxup(Tiki):
-    version = '1x'
-    implementation = 'a'
+    version = '1x'       # Version of Marxup (syntax/semantics)
+    implementation = 'a' # Version of implementation (behind the scenes)
 
     brackets = '\([^\s()<>]+|(\([^\s()<>]+\)))*\)'
 
     def __init__(self, raw):
         super(Marxup, self).__init__(raw)
-        self.preclean("&", "&amp;")
-        self.clean("<", "&lt;")
+        # Clean up the input and make it fit for HTML:
+        self.preclean("&", "&amp;")   # Safe for HTML entities
+        self.clean("<", "&lt;")       # Safe for HTML elements
         self.clean(">", "&gt;")
-        self.clean("(\r\n|\r)", "\n")
+        self.clean("(\r\n|\r)", "\n") # Fix Windows newlines
 
         # Define chunks:
         self.chunk(lambda text: self.element('h3', text), 'header', '^\=\s*(?P<text_header>.+?)$')
         self.chunk(lambda text: self.element('p', text, {'phrase': True, 'break': True}), 'paragraph', '((?m)^(?P<text_paragraph>\S.*?)(?:\n\n|\Z|\n\Z))', 5)
+        self.chunk(lambda text: self.element('p', text, {'class': 'important'}), 'important', '!!!\s*(?P<text_important>.+?)\s*!!!', 2)
         
         def code(text, meta):
             code = self.element('code', text, {'class': meta})
@@ -102,15 +106,19 @@ class Marxup(Tiki):
                 code = 'unknown'
             return code
         self.chunk(lambda text, meta: self.element('pre', code(text, meta)), 'code', '((?m)^\{\{\{(\s*&lt;(?P<meta_code>.+?)&gt;)?(?P<text_code>.+?)\}\}\})')
-        self.chunk(lambda text: self.element('p', text, {'class': 'important'}), 'important', '!!!\s*(?P<text_important>.+?)\s*!!!', 2)
 
         def list(text):
+        """Parse a Marxup list and create a HTML list"""
             html, stack = '', []
-            for match in re.finditer('((?xm)^\s* ([#\*]+) \s* (.+?) $)', text):
-                level, text = match.group(2), match.group(3)
+            list = re.finditer('((?xm)^\s* ([#\*]+) \s* (.+?) $)', text)
+            for match in list:
+                level = match.group(2) # Level of indentation
+                text = match.group(3)  # List element text
                 if level[0] == '#':
+                    # Ordered list
                     type = 'ol'
                 else:
+                    # Unordered list
                     type = 'ul'
                 item = self.element('li', text, {'phrase': True})
                 if len(level) > len(stack):
@@ -118,8 +126,8 @@ class Marxup(Tiki):
                     stack.append('</%s>' % type)
                 if len(level) < len(stack):
                     try:
-                        html += stack.pop()
-                    except: # popping an empty stack causes IndexError
+                        html += stack.pop() # Popping an empty stack causes IndexError
+                    except: 
                         pass
                 html += item
             if stack:
