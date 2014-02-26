@@ -108,7 +108,7 @@ class Marxup(Tiki):
         self.chunk(lambda text, meta: self.element('pre', code(text, meta)), 'code', '((?m)^\{\{\{(\s*&lt;(?P<meta_code>.+?)&gt;)?(?P<text_code>.+?)\}\}\})')
 
         def list(text):
-        """Parse a Marxup list and create a HTML list"""
+            """Parse a Marxup list and create a HTML list"""
             html, stack = '', []
             list = re.finditer('((?xm)^\s* ([#\*]+) \s* (.+?) $)', text)
             for match in list:
