@@ -98,7 +98,7 @@ class Marxup(Tiki):
         # Define chunks:
         self.chunk(lambda text: self.element('h3', text), 'header', '^\=\s*(?P<text_header>.+?)$')
         self.chunk(lambda text: self.element('p', text, {'phrase': True, 'break': True}), 'paragraph', '((?m)^(?P<text_paragraph>\S.*?)(?:\n\n|\Z|\n\Z))', 5)
-        self.chunk(lambda text: self.element('p', text, {'class': 'important'}), 'important', '!!!\s*(?P<text_important>.+?)\s*!!!', 2)
+        self.chunk(lambda text: self.element('span', text, {'class': 'important'}), 'important', '!!!\s*(?P<text_important>.+?)\s*!!!', 2)
         
         def code(text, meta):
             code = self.element('code', text, {'class': meta})
