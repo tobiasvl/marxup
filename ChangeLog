@@ -1,0 +1,24 @@
+= Version
+
+The source code of marxup.py claims it's v1x, implementation a.
+
+= Implementations
+
+The fragmentation of marxup is worse than Android! There are at least four
+parallel implementations of marxup. They're not identical, but all are v1.
+
+Python's regexp is better than Ruby 1.8 and Ruby 1.9 is better than both and we
+don't know about Io. Lua is good at generating HTML.
+
+* Io (used in poncho)
+** Slowest because Io is slow
+* Ruby (used in marx)
+** Fast because ruby is "fast"
+** Slightly different syntax
+** Maybe a kind of version 1.5 (but source says 0.6.5)
+* Python (this one, used in pyncho)
+** Equivalent to the Ruby version??
+* Lua (used in Sdf)
+** Officially this is "NovaML" and not marxup
+* C (used in blog.c)
+** Supports comments and magic
