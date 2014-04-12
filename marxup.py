@@ -139,7 +139,7 @@ class Marxup(Tiki):
         # Define phrases:
         self.phrase(lambda text: self.element('b', text, {'phrase': True}), 'bold', '(?<![\~])\*(?P<text_bold>.+?)\*')
         self.phrase(lambda text: self.element('i', text, {'phrase': True}), 'italic', '(?<![\~\:<])_(?P<text_italic>.+?)_')
-        self.phrase(lambda text: self.element('tt', text), 'tt', '(?<![\~])Â´(?P<text>.+?)Â´')
+        self.phrase(lambda text: self.element('tt', text), 'tt', '(?<![\~])´(?P<text_tt>.+?)´')
         self.phrase(lambda text, meta: self.element('a', text, {'href': meta, 'rel': 'nofollow'}), 'link', '\+(?P<text_link>[\w\*\'\:\!\,\.\-·\? ]+?)\+(\s*\((?P<meta_link>(http|gopher|ftp):\/\/.+?)\))', 0) #TODO more robust URL regex
         self.phrase(lambda text: self.element('span', '&hearts;', {'class': 'heart'}), 'heart', '(?P<text_heart>&lt;3)', 2)
         self.phrase(lambda text, meta: self.element('img', None, {'src': text, 'alt': '', 'title': meta}), 'image', '\&lt;(?P<text_image>\S+)\&gt;(\s*\((?P<meta_image>.+)\))?')
