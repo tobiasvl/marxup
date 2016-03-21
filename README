@@ -10,11 +10,12 @@ Marxup, the happy pha markup language, is used in several projects in different
 languages. This is the Python implementation. All the implementations are
 slightly different. Marxup is more fragmented than Android.
 
-  http://pha.hk/wiki/marxup
+*  http://pha.hk/wiki/marxup
+*  http://blekksprut.net/git/marxup/
 
 = pyncho
 
 This marxup implementation is used in pyncho:
 
-  http://github.com/tobiasvl/pyncho
-  http://pha.hk/wiki/pyncho
+*  http://github.com/tobiasvl/pyncho
+*  http://pha.hk/wiki/pyncho
